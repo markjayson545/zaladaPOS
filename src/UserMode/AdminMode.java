@@ -11,8 +11,15 @@ public class AdminMode {
         frame.setSize(400, 200);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setLocationRelativeTo(null);
-        frame.setLayout(new GridBagLayout());
+        frame.setLayout(new BorderLayout());
 
+        // Add header panel with back button
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JButton backBtn = new JButton("Back");
+        backBtn.addActionListener(e -> frame.dispose());
+        headerPanel.add(backBtn, BorderLayout.WEST);
+
+        // Main content panel
         JPanel panel = new JPanel(new GridLayout(2, 1, 10, 10));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
@@ -32,7 +39,8 @@ public class AdminMode {
         panel.add(viewSalesButton);
         panel.add(manageItemsButton);
 
-        frame.add(panel);
+        frame.add(headerPanel, BorderLayout.NORTH);
+        frame.add(panel, BorderLayout.CENTER);
         frame.setVisible(true);
     }
 }

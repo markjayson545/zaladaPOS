@@ -20,6 +20,14 @@ public class SalesView {
         // Main panel with BorderLayout
         JPanel mainPanel = new JPanel(new BorderLayout());
         
+        // Create header panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        
+        // Add back button
+        JButton backBtn = new JButton("Back");
+        backBtn.addActionListener(e -> frame.dispose());
+        headerPanel.add(backBtn, BorderLayout.WEST);
+        
         // Brand buttons panel
         JPanel brandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         String[] brands = DatabaseHandler.getBrands();
@@ -49,7 +57,8 @@ public class SalesView {
         JScrollPane scrollPane = new JScrollPane(salesTable);
         
         // Add components to main panel
-        mainPanel.add(brandPanel, BorderLayout.NORTH);
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(brandPanel, BorderLayout.CENTER);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         
         // Add total sales label at the bottom

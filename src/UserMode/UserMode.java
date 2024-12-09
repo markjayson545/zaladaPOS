@@ -144,14 +144,20 @@ public class UserMode {
         frame.getContentPane().removeAll();
         frame.setLayout(new BorderLayout());
 
-        // Add back button
-        JButton backButton = new JButton("Back to Brands");
-        backButton.addActionListener(e -> showBrandSelection());
-
+        // Create header panel with back button
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backBtn = new JButton("Back to Brands");
+        backBtn.addActionListener(e -> showBrandSelection());
+        
         // Add title label
         JLabel titleLabel = new JLabel("ZALADA POS SYSTEM", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        
+        topPanel.add(backBtn, BorderLayout.WEST);
+        topPanel.add(titleLabel, BorderLayout.CENTER);
+        
+        frame.add(topPanel, BorderLayout.NORTH);
 
         tableModel = new DefaultTableModel() {
             @Override
@@ -229,11 +235,6 @@ public class UserMode {
         bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         // Add components to frame
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(backButton, BorderLayout.WEST);
-        topPanel.add(titleLabel, BorderLayout.CENTER);
-        
-        frame.add(topPanel, BorderLayout.NORTH);
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(bottomPanel, BorderLayout.SOUTH);
 
