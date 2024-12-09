@@ -261,7 +261,7 @@ public class ManageItems {
         protected JButton button;
         private String label;
         private boolean isPushed;
-        private JTable table; // Add table reference
+        private JTable table;
 
         public BrandButtonEditor(JTextField textField) {
             super(textField);
@@ -273,7 +273,7 @@ public class ManageItems {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
-            this.table = table; // Store table reference
+            this.table = table;
             label = value.toString();
             button.setText(label);
             isPushed = true;
@@ -283,10 +283,12 @@ public class ManageItems {
         @Override
         public Object getCellEditorValue() {
             if (isPushed && table != null) {
-                String brandName = (String) table.getModel().getValueAt(
-                    table.getSelectedRow(), 1);
-                currentBrandId = DatabaseHandler.getBrandId(brandName);
-                showItemsTable(brandName);
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow >= 0 && selectedRow < table.getRowCount()) {  // Add this check
+                    String brandName = (String) table.getModel().getValueAt(selectedRow, 1);
+                    currentBrandId = DatabaseHandler.getBrandId(brandName);
+                    showItemsTable(brandName);
+                }
             }
             isPushed = false;
             return label;

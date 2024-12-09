@@ -4,6 +4,8 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import Database.DatabaseHandler;
+import MainUI.Main;
+
 import javax.swing.table.TableCellRenderer;
 
 public class UserMode {
@@ -82,11 +84,19 @@ public class UserMode {
         frame.getContentPane().removeAll();
         frame.setLayout(new BorderLayout());
 
+        // Create top panel with title and back button
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JButton backToMainBtn = new JButton("Back to Main Menu");
+        backToMainBtn.addActionListener(e -> returnToMainMenu());
+
         // Add title
         JLabel titleLabel = new JLabel("ZALADA POS SYSTEM", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-        frame.add(titleLabel, BorderLayout.NORTH);
+        
+        topPanel.add(backToMainBtn, BorderLayout.WEST);
+        topPanel.add(titleLabel, BorderLayout.CENTER);
+        frame.add(topPanel, BorderLayout.NORTH);
 
         // Create brands table
         DefaultTableModel brandTableModel = new DefaultTableModel(
@@ -137,6 +147,12 @@ public class UserMode {
         frame.add(new JScrollPane(brandTable), BorderLayout.CENTER);
         frame.revalidate();
         frame.repaint();
+    }
+
+    private void returnToMainMenu() {
+        frame.dispose();
+        Main main = new Main();
+        main.showUserMode();
     }
 
     private void showProductTable(int brandId) {

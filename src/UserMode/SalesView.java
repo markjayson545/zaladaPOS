@@ -4,12 +4,12 @@ import Database.DatabaseHandler;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
 
 public class SalesView {
     private JFrame frame;
     private JTable salesTable;
     private DefaultTableModel tableModel;
+    private JLabel totalLabel; // Add this field
 
     public void showSalesView() {
         frame = new JFrame("Sales View");
@@ -44,6 +44,25 @@ public class SalesView {
             brandPanel.add(brandBtn);
         }
 
+        // Add sorting panel
+        JPanel sortPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton sortByDateBtn = new JButton("Sort by Date");
+        JButton sortByTotalBtn = new JButton("Sort by Total");
+        JButton sortByQuantityBtn = new JButton("Sort by Quantity");
+
+        sortByDateBtn.addActionListener(e -> sortTable(4)); // Date column
+        sortByTotalBtn.addActionListener(e -> sortTable(3)); // Total column
+        sortByQuantityBtn.addActionListener(e -> sortTable(2)); // Quantity column
+
+        sortPanel.add(sortByDateBtn);
+        sortPanel.add(sortByTotalBtn);
+        sortPanel.add(sortByQuantityBtn);
+
+        // Create central panel to hold both brand and sort panels
+        JPanel controlPanel = new JPanel(new GridLayout(2, 1));
+        controlPanel.add(brandPanel);
+        controlPanel.add(sortPanel);
+
         // Create table
         String[] columns = {"ID", "Product", "Quantity", "Total", "Date", "Brand"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -55,16 +74,16 @@ public class SalesView {
         
         salesTable = new JTable(tableModel);
         JScrollPane scrollPane = new JScrollPane(salesTable);
+
+        // Bottom panel with total
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        totalLabel = new JLabel("Total Sales: $0.00");
+        bottomPanel.add(totalLabel);
         
         // Add components to main panel
         mainPanel.add(headerPanel, BorderLayout.NORTH);
-        mainPanel.add(brandPanel, BorderLayout.CENTER);
+        mainPanel.add(controlPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-        
-        // Add total sales label at the bottom
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JLabel totalLabel = new JLabel("Total Sales: $0.00");
-        bottomPanel.add(totalLabel);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         
         frame.add(mainPanel);
@@ -84,7 +103,7 @@ public class SalesView {
                 sales = DatabaseHandler.getSales();
                 for (String[] sale : sales) {
                     tableModel.addRow(sale);
-                    totalSales += Double.parseDouble(sale[3]); // Changed from sale[4] to sale[3] to match array structure
+                    totalSales += Double.parseDouble(sale[3]);
                 }
             } else {
                 sales = DatabaseHandler.getSalesByBrand(brandName);
@@ -94,14 +113,46 @@ public class SalesView {
                 }
             }
     
-            // Update total sales label
-            JPanel mainPanel = (JPanel) frame.getContentPane().getComponent(0);
-            JPanel bottomPanel = (JPanel) mainPanel.getComponent(2); // Get the bottom panel
-            JLabel totalLabel = (JLabel) bottomPanel.getComponent(0);
+            // Update total sales label directly using the class field
             totalLabel.setText(String.format("Total Sales: $%.2f", totalSales));
         } catch (Exception e) {
             System.out.println("Error updating table: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    // Add new method for sorting
+    private void sortTable(int column) {
+        int rowCount = tableModel.getRowCount();
+        Object[][] data = new Object[rowCount][6];
+        
+        // Copy data to array
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < 6; j++) {
+                data[i][j] = tableModel.getValueAt(i, j);
+            }
+        }
+
+        // Sort data
+        java.util.Arrays.sort(data, (a, b) -> {
+            if (column == 4) { // Date column
+                return ((String)b[column]).compareTo((String)a[column]); // newest first
+            } else { // Numeric columns (Total or Quantity)
+                double val1 = Double.parseDouble(a[column].toString());
+                double val2 = Double.parseDouble(b[column].toString());
+                return Double.compare(val2, val1); // highest first
+            }
+        });
+
+        // Update table with sorted data
+        tableModel.setRowCount(0);
+        double totalSales = 0.0;
+        for (Object[] row : data) {
+            tableModel.addRow(row);
+            totalSales += Double.parseDouble(row[3].toString());
+        }
+
+        // Update total
+        totalLabel.setText(String.format("Total Sales: $%.2f", totalSales));
     }
 }
