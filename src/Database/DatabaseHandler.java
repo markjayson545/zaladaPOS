@@ -116,6 +116,20 @@ public class DatabaseHandler {
         }
     }
 
+    public static void insertItem(int brandId, String name, double price, int stock) {
+        String query = "INSERT INTO items (brand_id, name, price, stock) VALUES (?, ?, ?, ?);";
+        try (Connection connection = DriverManager.getConnection(ITEMS_DB);
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, brandId);
+            statement.setString(2, name);
+            statement.setDouble(3, price);
+            statement.setInt(4, stock);
+            statement.execute();
+        } catch (Exception e) {
+            System.out.println("Error inserting item: " + e.getMessage());
+        }
+    }
+
     public static void updateItem(int id, String name, double price, int stock) {
         String query = "UPDATE items SET name = ?, price = ?, stock = ? WHERE id = ?;";
         try {
@@ -199,6 +213,26 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
         return new String[0];
+    }
+
+    public static String[][] getAllBrands() {
+        try (Connection connection = DriverManager.getConnection(ITEMS_DB);
+             Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery("SELECT * FROM brands ORDER BY id")) {
+            
+            java.util.List<String[]> brandsList = new java.util.ArrayList<>();
+            while (rs.next()) {
+                String[] brand = new String[2];
+                brand[0] = rs.getString("id");
+                brand[1] = rs.getString("name");
+                brandsList.add(brand);
+            }
+            
+            return brandsList.toArray(new String[0][]);
+        } catch (Exception e) {
+            System.out.println("Error getting brands: " + e.getMessage());
+            return new String[0][];
+        }
     }
 
     public static void updateStock(int id, int stock) {
@@ -371,34 +405,29 @@ public class DatabaseHandler {
     }
 
     public static String[][] getSales() {
-        String query = "SELECT * FROM sales;";
-        try {
-            Connection connection = DriverManager.getConnection(ITEMS_DB);
-            Statement statement = connection.createStatement();
+        String query = "SELECT * FROM sales ORDER BY date DESC;";
+        try (Connection connection = DriverManager.getConnection(ITEMS_DB);
+             Statement statement = connection.createStatement()) {
+            
+            java.util.List<String[]> salesList = new java.util.ArrayList<>();
             ResultSet resultSet = statement.executeQuery(query);
-            int rowCount = 0;
+            
             while (resultSet.next()) {
-                rowCount++;
+                String[] sale = new String[6];
+                sale[0] = resultSet.getString("id");
+                sale[1] = resultSet.getString("product_name");
+                sale[2] = resultSet.getString("quantity");
+                sale[3] = String.format("%.2f", resultSet.getDouble("total"));
+                sale[4] = resultSet.getString("date");
+                sale[5] = resultSet.getString("brand_name");
+                salesList.add(sale);
             }
-            resultSet.beforeFirst();
-            String[][] sales = new String[rowCount][6];
-            int index = 0;
-            while (resultSet.next()) {
-                sales[index][0] = resultSet.getString("id");
-                sales[index][1] = resultSet.getString("item_id");
-                sales[index][2] = resultSet.getString("product_name");
-                sales[index][3] = resultSet.getString("quantity");
-                sales[index][4] = resultSet.getString("total");
-                sales[index][5] = resultSet.getString("date");
-                index++;
-            }
-            statement.close();
-            connection.close();
-            return sales;
+            
+            return salesList.toArray(new String[0][]);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error getting sales: " + e.getMessage());
+            return new String[0][];
         }
-        return null;
     }
 
     public static void deleteSale(int id) {
@@ -430,6 +459,52 @@ public class DatabaseHandler {
             System.out.println(e.getMessage());
         }
         return 0.0;
+    }
+
+    // Add these new methods for sales data
+    public static String[][] getSalesByBrand(String brandName) {
+        String query = "SELECT * FROM sales WHERE brand_name = ? ORDER BY date DESC;";
+        try (Connection connection = DriverManager.getConnection(ITEMS_DB);
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            
+            statement.setString(1, brandName);
+            ResultSet resultSet = statement.executeQuery();
+            
+            java.util.List<String[]> salesList = new java.util.ArrayList<>();
+            while (resultSet.next()) {
+                String[] sale = new String[6];
+                sale[0] = resultSet.getString("id");
+                sale[1] = resultSet.getString("product_name");
+                sale[2] = resultSet.getString("quantity");
+                sale[3] = String.format("%.2f", resultSet.getDouble("total"));
+                sale[4] = resultSet.getString("date");
+                sale[5] = resultSet.getString("brand_name");
+                salesList.add(sale);
+            }
+            
+            return salesList.toArray(new String[0][]);
+        } catch (Exception e) {
+            System.out.println("Error getting sales by brand: " + e.getMessage());
+            return new String[0][];
+        }
+    }
+
+    public static double getTotalSalesByBrand(String brandName) {
+        String query = "SELECT SUM(total) as total FROM sales WHERE brand_name = ?;";
+        try (Connection connection = DriverManager.getConnection(ITEMS_DB);
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            
+            statement.setString(1, brandName);
+            ResultSet resultSet = statement.executeQuery();
+            
+            if (resultSet.next()) {
+                return resultSet.getDouble("total");
+            }
+            return 0.0;
+        } catch (Exception e) {
+            System.out.println("Error getting total sales: " + e.getMessage());
+            return 0.0;
+        }
     }
 
 }

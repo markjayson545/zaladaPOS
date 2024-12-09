@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.*;
 
 import Database.DatabaseHandler;
+import UserMode.AdminMode;
 
 import java.awt.event.*;
 
@@ -29,6 +30,12 @@ public class Main {
                 UserMode.UserMode userMode = new UserMode.UserMode();
                 userMode.showUserMode();
                 frame.dispose(); // Move this after creating and showing UserMode
+            }
+        });
+
+        adminButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AdminMode.showAdminMode();
             }
         });
 

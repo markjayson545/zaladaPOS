@@ -133,30 +133,8 @@ public class UserMode {
             brandTableModel.addRow(new Object[]{brand, ""});
         }
 
-        // Add brand panel
-        JPanel addBrandPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JTextField brandNameField = new JTextField(20);
-        JButton addBrandButton = new JButton("Add New Brand");
-        
-        addBrandButton.addActionListener(e -> {
-            String brandName = brandNameField.getText().trim();
-            if (!brandName.isEmpty()) {
-                DatabaseHandler.insertBrand(brandName);
-                brandTableModel.addRow(new Object[]{brandName, ""});
-                brandNameField.setText("");
-            }
-        });
-
-        addBrandPanel.add(new JLabel("Brand Name:"));
-        addBrandPanel.add(brandNameField);
-        addBrandPanel.add(addBrandButton);
-
         // Layout
-        JPanel centerPanel = new JPanel(new BorderLayout());
-        centerPanel.add(new JScrollPane(brandTable), BorderLayout.CENTER);
-        centerPanel.add(addBrandPanel, BorderLayout.SOUTH);
-        
-        frame.add(centerPanel, BorderLayout.CENTER);
+        frame.add(new JScrollPane(brandTable), BorderLayout.CENTER);
         frame.revalidate();
         frame.repaint();
     }
